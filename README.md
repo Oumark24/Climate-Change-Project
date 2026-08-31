@@ -1,73 +1,49 @@
-# React + TypeScript + Vite
+# Climate Fair Share
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+An interactive version of a research essay arguing that wealthy individuals and large corporations should pay more toward climate costs, built with React 19, TypeScript, Tailwind 4 and Vite.
 
-Currently, two official plugins are available:
+Instead of publishing the essay as a document, the argument is turned into something you can poke at: the three policy proposals are a tabbed comparison, and the revenue argument is a live slider model.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+**Live site:** https://oumark24.github.io/Climate-Change-Project/
 
-## React Compiler
+## What it does
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Policy comparison** — `carbon` (a carbon tax on pollution), `wealth` (higher taxes on high emitters) and `corporate` (polluter payments) are keyed by a `PolicyKey` union type and swapped in place, each with its rationale and its concrete effects, so the three proposals can be read against each other rather than in sequence.
+- **Interactive revenue sketch** — two range inputs, carbon price ($20–150/ton) and emissions covered (5–50M tons), feeding `revenue = taxRate * emissions` through a `useMemo`. It's labelled as a sketch, not a forecast: it shows the order of magnitude of funding a carbon price produces, which is the essay's actual claim.
+- **Cited statistics** — the 40% / 1% / 66% emissions-inequality figures each carry their source (UMass Amherst via ScienceDaily 2023, Oxfam 2023), and a sources section lists the full citations with a plain-English note on what each source is being used to support.
+- **Sections on where revenue goes** — renewable energy, public transportation, and climate resilience.
 
-## Expanding the ESLint configuration
+## Why it's built this way
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+The point of the project was to make an argument navigable. A reader who doubts the revenue claim can move the sliders; a reader who wants the sourcing can read the citations next to the numbers they support. Every statistic on the page is attributed, because it's a research project — no figure appears without its source.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+Tailwind 4 is used through the Vite plugin (no separate config file), and the entire page is one `App.tsx` component with the content as typed data structures at the top — a page this size doesn't benefit from being split apart.
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## Running it
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+npm run dev      # http://localhost:5173
+npm run lint     # eslint
+npm run build    # tsc -b && vite build
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Deployment
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+`.github/workflows/static.yml` runs `npm ci && npm run build` on every push to `main` and publishes `dist/` to GitHub Pages. `vite.config.ts` sets `base: './'` so the built asset URLs resolve under the project subpath.
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## Layout
+
+| Path | Purpose |
+| --- | --- |
+| `src/App.tsx` | Whole page — policy data, sources, revenue model, layout |
+| `src/main.tsx` | React entry point |
+| `index.html` | Document shell |
+| `public/` | Favicon and static assets copied verbatim into the build |
+| `vite.config.ts` | Vite + React + Tailwind 4 |
+| `eslint.config.js` | Flat ESLint config with react-hooks rules |
+
+## Sources
+
+- Nader, Ralph, and Toby Heaps. "A Carbon Tax Will Help Curb Global Warming." *Global Warming*, edited by David Haugen et al., Greenhaven Press, 2010. Opposing Viewpoints, Gale In Context.
+- "America's Wealthiest 10% Responsible for 40% of US Greenhouse Gas Emissions." *ScienceDaily*, University of Massachusetts Amherst, 18 Aug. 2023.
